@@ -320,8 +320,9 @@ public class Slobber implements Container {
         Slob.Blob blob = slob.get(key);
         String contentType = blob.getContentType();
         ContentTypeParser ctParser = new ContentTypeParser(contentType);
-        String parsedContentType = ctParser.getType();
         /*TODO: fix
+        //String parsedContentType = ctParser.getType();
+
         if (allowedContentTypes.contains(parsedContentType)) {
             return blob;
         }*/
@@ -415,8 +416,10 @@ public class Slobber implements Container {
                     notFound(response);
                     return;
                 }
+
+                Slob slob = getSlob(slobId);
                 int index = q.getInteger("index") ;
-                Slob.Blob blob = getWord(getSlob(slobId), index);
+                Slob.Blob blob = getWord(slob, index);
 
                 if (blob == null) {
                     notFound(response);
@@ -425,6 +428,7 @@ public class Slobber implements Container {
                 Map<String, String> item = new HashMap<String, String>();
                 item.put("url", mkContentURL(blob));
                 item.put("label", blob.key);
+                item.put("count", String.valueOf(slob.size()));
                 response.setValue("Content-Type", "application/json");
                 response.setValue("Cache-Control", "no-cache");
                 OutputStream out = response.getOutputStream();
