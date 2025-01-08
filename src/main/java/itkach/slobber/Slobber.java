@@ -316,6 +316,19 @@ public class Slobber implements Container {
         return null;
     }
 
+    public Slob.Blob getWord(Slob slob, int key) {
+        Slob.Blob blob = slob.get(key);
+        String contentType = blob.getContentType();
+        ContentTypeParser ctParser = new ContentTypeParser(contentType);
+        String parsedContentType = ctParser.getType();
+        /*TODO: fix
+        if (allowedContentTypes.contains(parsedContentType)) {
+            return blob;
+        }*/
+
+       return blob;
+    }
+
     private Map<String, Object> toInfoItem(Slob s) {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("id", s.getId().toString());
@@ -389,6 +402,34 @@ public class Slobber implements Container {
                 OutputStream out = response.getOutputStream();
                 OutputStreamWriter os = new OutputStreamWriter(out, "UTF8");
                 json.writeValue(os, items);
+                os.close();
+            }
+        });
+
+        handlers.put("getWord", new GETContainer() {
+            @Override
+            public void GET(Request request, Response response) throws Exception{
+                Query q = request.getQuery();
+                String slobId = q.get("slob");
+                if (slobId == null) {
+                    notFound(response);
+                    return;
+                }
+                int index = q.getInteger("index") ;
+                Slob.Blob blob = getWord(getSlob(slobId), index);
+
+                if (blob == null) {
+                    notFound(response);
+                    return;
+                }
+                Map<String, String> item = new HashMap<String, String>();
+                item.put("url", mkContentURL(blob));
+                item.put("label", blob.key);
+                response.setValue("Content-Type", "application/json");
+                response.setValue("Cache-Control", "no-cache");
+                OutputStream out = response.getOutputStream();
+                OutputStreamWriter os = new OutputStreamWriter(out, "UTF8");
+                json.writeValue(os, item);
                 os.close();
             }
         });
