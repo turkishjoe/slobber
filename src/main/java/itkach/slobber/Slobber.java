@@ -425,15 +425,22 @@ public class Slobber implements Container {
                     notFound(response);
                     return;
                 }
-                Map<String, String> item = new HashMap<String, String>();
-                item.put("url", mkContentURL(blob));
-                item.put("label", blob.key);
-                item.put("count", String.valueOf(slob.size()));
-                response.setValue("Content-Type", "application/json");
-                response.setValue("Cache-Control", "no-cache");
+                //Map<String, String> item = new HashMap<String, String>();
+                //item.put("url", mkContentURL(blob));
+                //item.put("label", blob.key);
+               // item.put("content", blob.getContent().data.);
+                //item.put("count", String.valueOf(slob.size()));
+                //response.setValue("Content-Type", "application/json");
+               // response.setValue("Cache-Control", "no-cache");
                 OutputStream out = response.getOutputStream();
                 OutputStreamWriter os = new OutputStreamWriter(out, "UTF8");
-                json.writeValue(os, item);
+
+
+                Slob.Content reader = slob.getContent(blob.id);
+                response.setValue("Cache-Control", "max-age=31556926");
+                serveContent(response, reader);
+
+               // json.writeValue(os, item);
                 os.close();
             }
         });
